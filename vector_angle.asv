@@ -1,0 +1,68 @@
+clc; clear all; close all
+
+%% Constants
+
+function theta_deg = angle_between_vectors(A, B)
+    % Calculate the dot product and magnitudes of the vectors
+    dotProd = dot(A, B);
+    magA = norm(A);
+    magB = norm(B);
+
+    % Calculate the angle in radians
+    theta = acos(dotProd / (magA * magB));
+
+    % Convert to degrees
+    theta_deg = rad2deg(theta);
+end
+
+
+function theta_deg = min_nadir_angle(pos_sat, pos_body, r_body)
+
+    dist_to_center = norm(pos_body-pos_sat);
+    theta = arcsin(r_body/dist_to_center);
+    theta_deg = rad2deg(theta);
+
+end
+
+
+
+% gs_pos = [];
+% sat_pos = [];
+% earth_pos = [];
+% moon_pos = [];
+% 
+% vec_sat_moon = moon_pos - sat_pos;
+% vec_sat_gs = gs_pos - sat_pos;
+% 
+% min_nadir_angle = arcsin(r_earth/(r_earth+alt_sat));
+% 
+% 
+% vec_sat_earth_pos = earth_pos - sat_pos;
+
+angle_between_vectors([-1,0],[1,1])
+
+
+% algorithm to check whether moon is blocking LOS
+
+function is_blocked = is_lunar_sat_accessible(sat_pos,gs_pos,moon_pos,cone_angle_threshold)
+
+% set block
+is_blocked = True;
+
+% initialize vector
+lunar_sat_nadir_vector = moon_pos - sat_pos;
+lunar_sat_to_gs_vector = gs_pos - sat_pos;
+lunar_sat_zenith_vector = sat_pos - moon_pos;
+
+% check blockage with moon
+angle_separation = angle_between_vectors(lunar_sat_nadir_vector,lunar_sat_to_gs_vector);
+moon_blockage_angle = min_nadir_angle(pos_sat, pos_body, r_body);
+
+% check to makes sure cone angle within bound
+lunar_sat_cone_angle = angle_between_vectors(lunar_sat_zenith_vector,lunar_sat_to_gs_vector);
+
+if angle_separation > moon_blockage_angle && lunar_sat_cone_angle < cone_angle_threshold
+    is_blocked = False;
+end
+
+end
